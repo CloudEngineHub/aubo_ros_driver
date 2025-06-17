@@ -42,6 +42,14 @@ bool AuboHardwareInterface::init(ros::NodeHandle &root_nh,
             auto &msg = msgs[i];
         }
     });
+    robot_name_ = rpc_client_->getRobotNames().front();
+
+    rpc_client_->getRobotInterface(robot_name_)
+    ->getRobotConfig()
+    ->setHardwareCustomParameters("[joint_func] \n vff_enable = false\n");
+
+    std::cout << "vff_enable = false" << std::endl;
+
     // 设置rtde输入
     setInput(rtde_client_);
 
@@ -90,14 +98,22 @@ void AuboHardwareInterface::read(const ros::Time &time,
 void AuboHardwareInterface::write(const ros::Time &time,
                                   const ros::Duration &period)
 {
-    
-    try {
-            if(position_controller_running_){
-                Servoj(joint_position_command_);
+    if (robot_mode_ == RobotModeType::Running && (safety_mode_ == 
+        SafetyModeType::Normal || safety_mode_ == SafetyModeType::ReducedMode)) {
+        try {
+                if(position_controller_running_){
+                    Servoj(joint_position_command_);
+                }
+            } catch (const std::exception &e) {
+                ROS_ERROR_STREAM("Exception in write(): " << e.what());
             }
-        } catch (const std::exception &e) {
-        }
-    
+        }else{
+        // 机器人状态异常
+        ROS_WARN_STREAM_THROTTLE(1.0,
+            "Robot not in valid state for motion command. Plz check&fix robot status firstly then restart driver"
+            << "Current robot_mode_: " << static_cast<int>(robot_mode_)
+            << ", safety_mode_: " << static_cast<int>(safety_mode_));
+    }
 
 }
 bool AuboHardwareInterface::isServoModeStart()
