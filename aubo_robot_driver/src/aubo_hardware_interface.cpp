@@ -110,7 +110,7 @@ void AuboHardwareInterface::write(const ros::Time &time,
         }else{
         // 机器人状态异常
         ROS_WARN_STREAM_THROTTLE(1.0,
-            "Robot not in valid state for motion command. Plz restart driver and check robot status"
+            "Robot not in valid state for motion command. Plz check&fix robot status firstly then restart driver"
             << "Current robot_mode_: " << static_cast<int>(robot_mode_)
             << ", safety_mode_: " << static_cast<int>(safety_mode_));
     }
