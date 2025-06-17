@@ -146,6 +146,7 @@ private:
     std::vector<std::string> joint_names_;
     std::mutex rtde_mtx_;
     std::string robot_ip_;
+    std::string robot_name_;
 
     hardware_interface::JointStateInterface js_interface_;
     hardware_interface::PositionJointInterface pj_interface_;
